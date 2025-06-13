@@ -1,9 +1,7 @@
 import React, { useEffect } from "react";
-import weatherImage from "../image/cloude.png";
 import { useState } from "react";
-import { fetchWeatherApi } from "openmeteo";
 import axios from "axios";
-import { stat } from "fs";
+import { useTranslation } from "react-i18next";
 
 type WeatherCardProps = {
   latitude?: number;
@@ -20,6 +18,20 @@ function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
     51: "/icons/rainy-day.png",
     61: "/icons/heavy-rain.png",
     95: "/icons/thunderstorm.png",
+  };
+  const nameOfMonth: { [kay: number]: string } = {
+    1: "January",
+    2: "February",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December",
   };
   const weatherCodeMap: { [key: number]: string } = {
     0: "Clear sky",
@@ -41,10 +53,12 @@ function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
     96: "Thunderstorm with slight hail",
     99: "Thunderstorm with heavy hail",
   };
-  const [time, setTime] = useState();
+  const [time, setTime] = useState<string>();
   const [temperature, setTemperature] = useState<number>();
   const [weatherCode, setWeatherCode] = useState<number>();
   const [state, setState] = useState<number>();
+  const [language, setLanguage] = useState<string>("");
+  const [t, i18n] = useTranslation();
 
   useEffect(() => {
     if (latitude && longitude) {
@@ -64,7 +78,7 @@ function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
               "temperature_180m",
             ],
             current: ["is_day", "weather_code", "surface_pressure"],
-            timezone: "auto", // optional but recommended
+            timezone: "auto",
           },
         })
         .then((res) => {
@@ -80,29 +94,60 @@ function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
     }
   }, [latitude, longitude]);
 
-  return (
-    <div className="text-white flex flex-col items-center justify-center  m-10 py-4 px-6  bg-[#003049] rounded">
-      <div className="head  flex gap-10  items-center self-start mb-4">
-        <div className="cityName">
-          <h1 className="text-[40px] font-bold">
-            {name}
-            <span className="text-[20px] font-thin"> {time}</span>
-          </h1>
-        </div>
-      </div>
 
-      <div className="body flex items-center justify-center gap-6">
-        <div className="data font-medium text-left leading-[2] text-[17px] capitalize">
-          <h1 className="text-7xl font-semibold">{temperature}</h1>
-          <p>{weatherCodeMap[state || 0]}</p>
-          <p className="">down:{temperature} | large:{temperature}</p>
+
+  const handleLanguageChnage = () => { 
+      if(language ==="AR"){
+        i18n.changeLanguage("en");
+        setLanguage("EN")
+          document.documentElement.setAttribute("dir", "ltr");
+      }
+      else{
+         i18n.changeLanguage("ar");
+        setLanguage("AR")
+            document.documentElement.setAttribute("dir", "rtl");
+      }
+    };
+
+  const timeArr = time?.split("-") || "";
+  const monthIndex = time ? Number(timeArr[1]) - 1 : 0;
+  const monthName = nameOfMonth[monthIndex] || "";
+
+  return (
+    <>
+      <div   className="text-white flex flex-col items-center justify-center m-10 py-4 px-6 bg-[#003049] rounded-2xl shadow-2xl shadow-black/30 ">
+        <div  className="head  flex gap-10  items-center self-start mb-4">
+          <div className="cityName" >
+            <h1 className="text-[40px] font-bold">
+              {name}
+              <span className="text-[20px] font-thin">
+                {timeArr[0]} {monthName} {timeArr[2]}
+              </span>
+            </h1>
+          </div>
         </div>
-        <div className="image">
-          {}
-          <img src={weatherIcons[weatherCode ||0]} alt={state?"":""} className="w-[200px]" />
+
+        <div className="body flex items-center justify-center gap-6">
+          <div className="data font-medium text-left leading-[2] text-[17px] capitalize">
+            <h1 className="text-7xl font-semibold">{temperature}</h1>
+            <p>{weatherCodeMap[state || 0]}</p>
+            <p className="">
+              {t("down")}:{temperature} | {t("up")}:{temperature}
+            </p>
+          </div>
+          <div className="image">
+            <img
+              src={weatherIcons[weatherCode || 0]}
+              alt={state ? "" : ""}
+              className="w-[200px]"
+            />
+          </div>
         </div>
       </div>
-    </div>
+      <p onClick={handleLanguageChnage} className="text-white cursor-pointer">
+        {language==="AR"?"EN":"عربي"}
+      </p>
+    </>
   );
 }
 

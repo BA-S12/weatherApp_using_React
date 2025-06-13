@@ -20,7 +20,7 @@ function SearchBar({ setLatitude, setLongitude,setName }: SearchBarProps) {
     axios
       .get("https://geocoding-api.open-meteo.com/v1/search", {
         params: {
-          name: city,
+          name: city.trim(),
           country_code: "SA",
         },
       })

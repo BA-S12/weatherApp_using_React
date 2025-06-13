@@ -7,9 +7,10 @@ function MainPage() {
   const [longitude, setLongitude] = useState<number | undefined>();
   const [name, setName] = useState<string | undefined>();
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#14213d]">
+    <div className="flex flex-col items-center justify-center  min-h-screen bg-[#14213d] ">
       <SearchBar setLatitude={setLatitude} setLongitude={setLongitude} setName={setName} />
       <WeatherCard latitude={latitude} longitude={longitude} name={name} />
+
     </div>
   );
 }
