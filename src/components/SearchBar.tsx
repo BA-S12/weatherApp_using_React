@@ -30,10 +30,10 @@ function SearchBar({ setLatitude, setLongitude,setName }: SearchBarProps) {
           (loc) => loc.country_code.toUpperCase() === "SA"
         );
         console.log(filtered)
-        if (filtered.length > 0) {
-          setLatitude(filtered[0].latitude);
-          setLongitude(filtered[0].longitude);
-          setName(filtered[0].name)
+        if (results.length > 0) {
+          setLatitude(results[0].latitude);
+          setLongitude(results[0].longitude);
+          setName(results[0].name)
         }
       })
       .catch((err) => {

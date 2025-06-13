@@ -13,13 +13,12 @@ type WeatherCardProps = {
 
 function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
   const weatherIcons: { [key: number]: string } = {
-    0: "/icons/sunny.png",
-    1: "/icons/mostly-sunny.png",
-    2: "/icons/cloudy.png",
-    3: "/icons/very-cloudy.png",
-    45: "/icons/fog.png",
-    51: "/icons/drizzle.png",
-    61: "/icons/rain.png",
+    0: "/icons/wi-day-sunny.svg",
+    1: "/icons/weather.png",
+    2: "/icons/wi-cloud.svg",
+    45: "/icons/wi-fog.svg",
+    51: "/icons/rainy-day.png",
+    61: "/icons/heavy-rain.png",
     95: "/icons/thunderstorm.png",
   };
   const weatherCodeMap: { [key: number]: string } = {
@@ -86,7 +85,7 @@ function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
       <div className="head  flex gap-10  items-center self-start mb-4">
         <div className="cityName">
           <h1 className="text-[40px] font-bold">
-            {name || "no thing"}
+            {name}
             <span className="text-[20px] font-thin"> {time}</span>
           </h1>
         </div>
@@ -96,11 +95,11 @@ function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
         <div className="data font-medium text-left leading-[2] text-[17px] capitalize">
           <h1 className="text-7xl font-semibold">{temperature}</h1>
           <p>{weatherCodeMap[state || 0]}</p>
-          <p className="">down:40 | large:40</p>
+          <p className="">down:{temperature} | large:{temperature}</p>
         </div>
         <div className="image">
-          {weatherIcons[weatherCode ||0]}
-          {/* <img src={weatherImage} alt="cloude" className="w-[200px]" /> */}
+          {}
+          <img src={weatherIcons[weatherCode ||0]} alt={state?"":""} className="w-[200px]" />
         </div>
       </div>
     </div>
