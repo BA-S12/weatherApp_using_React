@@ -2,14 +2,24 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { RootState } from "../app/store";
 
 type WeatherCardProps = {
   latitude?: number;
   longitude?: number;
   name?: string;
 };
-
+interface Location {
+  id: number;
+  name: string;
+  latitude: number; // make sure this is here
+  longitude: number; // make sure this is here
+}
 function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
+
+  const info:Location = useSelector((state:RootState)=>state.geo.info);
+
   const weatherIcons: { [key: number]: string } = {
     0: "/icons/wi-day-sunny.svg",
     1: "/icons/weather.png",
@@ -61,14 +71,17 @@ function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
   const [t, i18n] = useTranslation();
 
   useEffect(() => {
-    if (latitude && longitude) {
+         console.log("---------------------------------")
+      console.log(info.latitude,info.longitude)
+    if (info.latitude && info.longitude) {
+ 
       const url = "https://api.open-meteo.com/v1/forecast";
 
       axios
         .get(url, {
           params: {
-            latitude: latitude,
-            longitude: longitude,
+            latitude: info.latitude,
+            longitude: info.longitude,
             daily: ["sunset", "sunrise"],
             hourly: [
               "temperature_2m",
@@ -92,7 +105,7 @@ function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
           console.log(err);
         });
     }
-  }, [latitude, longitude]);
+  }, [info.longitude, info.latitude]);
 
 
 
