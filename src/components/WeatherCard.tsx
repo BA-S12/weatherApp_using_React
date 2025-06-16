@@ -1,29 +1,37 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import axios from "axios";
-import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
-import { RootState } from "../app/store";
 
-type WeatherCardProps = {
-  latitude?: number;
-  longitude?: number;
-  name?: string;
-};
+import { useTranslation } from "react-i18next";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../app/store";
+import { fetchTheWeatherInfo } from "../app/slice/GeoSlice";
+import type { AppDispatch } from "../app/store";
 interface Location {
   id: number;
   name: string;
   latitude: number; // make sure this is here
   longitude: number; // make sure this is here
 }
-function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
 
-  const info:Location = useSelector((state:RootState)=>state.geo.info);
+interface weatherInfo {
+  time: string;
+  temperature: number;
+  weatherCode: number;
+  state: number;
+}
+function WeatherCard() {
+  const info: Location = useSelector((state: RootState) => state.geo.info);
+  const dispatch = useDispatch<AppDispatch>();
+  const weatherInfo: weatherInfo = useSelector(
+    (state: RootState) => state.geo.weatherInfo
+  );
+  const status = useSelector((state: RootState) => state.geo.status);
 
   const weatherIcons: { [key: number]: string } = {
     0: "/icons/wi-day-sunny.svg",
     1: "/icons/weather.png",
     2: "/icons/wi-cloud.svg",
+    3: "/icons/wi-cloud.svg",
     45: "/icons/wi-fog.svg",
     51: "/icons/rainy-day.png",
     61: "/icons/heavy-rain.png",
@@ -63,76 +71,44 @@ function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
     96: "Thunderstorm with slight hail",
     99: "Thunderstorm with heavy hail",
   };
-  const [time, setTime] = useState<string>();
-  const [temperature, setTemperature] = useState<number>();
-  const [weatherCode, setWeatherCode] = useState<number>();
-  const [state, setState] = useState<number>();
+
   const [language, setLanguage] = useState<string>("");
   const [t, i18n] = useTranslation();
 
   useEffect(() => {
-         console.log("---------------------------------")
-      console.log(info.latitude,info.longitude)
-    if (info.latitude && info.longitude) {
- 
-      const url = "https://api.open-meteo.com/v1/forecast";
-
-      axios
-        .get(url, {
-          params: {
-            latitude: info.latitude,
-            longitude: info.longitude,
-            daily: ["sunset", "sunrise"],
-            hourly: [
-              "temperature_2m",
-              "weather_code",
-              "temperature_80m",
-              "temperature_120m",
-              "temperature_180m",
-            ],
-            current: ["is_day", "weather_code", "surface_pressure"],
-            timezone: "auto",
-          },
+    if (status === "succeeded" && info.latitude && info.longitude) {
+      dispatch(
+        fetchTheWeatherInfo({
+          latitude: info.latitude,
+          longitude: info.longitude,
         })
-        .then((res) => {
-          console.log(res.data);
-          setTime(res.data.daily.time[0]);
-          setTemperature(res.data.hourly.temperature_180m[0]);
-          setWeatherCode(res.data.hourly.weather_code[0]);
-          setState(res.data.current.is_day);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      );
     }
-  }, [info.longitude, info.latitude]);
+  }, [status]); // status to fetch after another fetch
 
+  const handleLanguageChnage = () => {
+    if (language === "AR") {
+      i18n.changeLanguage("en");
+      setLanguage("EN");
+      document.documentElement.setAttribute("dir", "ltr");
+    } else {
+      i18n.changeLanguage("ar");
+      setLanguage("AR");
+      document.documentElement.setAttribute("dir", "rtl");
+    }
+  };
 
-
-  const handleLanguageChnage = () => { 
-      if(language ==="AR"){
-        i18n.changeLanguage("en");
-        setLanguage("EN")
-          document.documentElement.setAttribute("dir", "ltr");
-      }
-      else{
-         i18n.changeLanguage("ar");
-        setLanguage("AR")
-            document.documentElement.setAttribute("dir", "rtl");
-      }
-    };
-
-  const timeArr = time?.split("-") || "";
-  const monthIndex = time ? Number(timeArr[1]) - 1 : 0;
+  const timeArr = weatherInfo.time?.split("-") || "";
+  const monthIndex = weatherInfo.time ? Number(timeArr[1]) - 1 : 0;
   const monthName = nameOfMonth[monthIndex] || "";
 
   return (
     <>
-      <div   className="text-white flex flex-col items-center justify-center m-10 py-4 px-6 bg-[#003049] rounded-2xl shadow-2xl shadow-black/30 ">
-        <div  className="head  flex gap-10  items-center self-start mb-4">
-          <div className="cityName" >
+      <div className="text-white flex flex-col items-center justify-center m-10 py-4 px-6 bg-[#003049] rounded-2xl shadow-2xl shadow-black/30 ">
+        <div className="head  flex gap-10  items-center self-start mb-4">
+          <div className="cityName">
             <h1 className="text-[40px] font-bold">
-              {name}
+              {info.name}
               <span className="text-[20px] font-thin">
                 {timeArr[0]} {monthName} {timeArr[2]}
               </span>
@@ -142,23 +118,23 @@ function WeatherCard({ latitude, longitude, name }: WeatherCardProps) {
 
         <div className="body flex items-center justify-center gap-6">
           <div className="data font-medium text-left leading-[2] text-[17px] capitalize">
-            <h1 className="text-7xl font-semibold">{temperature}</h1>
-            <p>{weatherCodeMap[state || 0]}</p>
+            <h1 className="text-7xl font-semibold">{weatherInfo.temperature}</h1>
+            <p>{weatherCodeMap[weatherInfo.state || 0]}</p>
             <p className="">
-              {t("down")}:{temperature} | {t("up")}:{temperature}
+              {t("down")}:{weatherInfo.temperature} | {t("up")}:{weatherInfo.temperature}
             </p>
           </div>
           <div className="image">
             <img
-              src={weatherIcons[weatherCode || 0]}
-              alt={state ? "" : ""}
+              src={weatherIcons[weatherInfo.weatherCode || 0]}
+              alt={weatherInfo.state ? "" : ""}
               className="w-[200px]"
             />
           </div>
         </div>
       </div>
       <p onClick={handleLanguageChnage} className="text-white cursor-pointer">
-        {language==="AR"?"EN":"عربي"}
+        {language === "AR" ? "EN" : "عربي"}
       </p>
     </>
   );

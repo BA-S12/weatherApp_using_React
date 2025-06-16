@@ -11,13 +11,9 @@ interface Location {
   latitude: number; // make sure this is here
   longitude: number; // make sure this is here
 }
-interface SearchBarProps {
-  setLatitude: React.Dispatch<React.SetStateAction<number | undefined>>;
-  setLongitude: React.Dispatch<React.SetStateAction<number | undefined>>;
-  setName: React.Dispatch<React.SetStateAction<string | undefined>>;
-}
 
-function SearchBar({ setLatitude, setLongitude, setName }: SearchBarProps) {
+
+function SearchBar() {
   const dispatch = useDispatch<AppDispatch>();
   const isLoading = useSelector((state: RootState) => state.geo.isLoding);
   const info: Location = useSelector((state: RootState) => state.geo.info);
@@ -29,12 +25,8 @@ function SearchBar({ setLatitude, setLongitude, setName }: SearchBarProps) {
     console.log(info);
     dispatch(featchGeoInfo(city));
   };
-  // becuse after the dispatch end send the data
-  useEffect(() => {
-    setLatitude(info.latitude);
-    setLongitude(info.longitude);
-    setName(info.name);
-  }, [info,setLatitude,setLongitude,setName]);
+
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       search();
