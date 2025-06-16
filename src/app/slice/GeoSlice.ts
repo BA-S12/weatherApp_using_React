@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
 import axios from "axios";
+
 interface stateType {
   value: number;
   info: { id: number; name: string; latitude: number; longitude: number };
@@ -36,8 +36,11 @@ const initialState: stateType = {
 };
 // Don’t access live state from initialState 🔴🔴🔴🔴🔴
 // the string is prefex, put what you want
+// inside the <> first pram is interface["the object henadle the response data"]
+// after that, the type of data you want to used inside the API
 export const featchGeoInfo = createAsyncThunk<stateType["info"], string>(
   "geoInfoAPI/fatch",
+  // the var you want to get form component  
   async (city: string) => {
     const res = await axios.get(
       "https://geocoding-api.open-meteo.com/v1/search",
@@ -55,10 +58,12 @@ export const featchGeoInfo = createAsyncThunk<stateType["info"], string>(
     const name = data.name;
     const latitude = data.latitude;
     const longitude = data.longitude;
+    // send data to  catch in extraReducers
     return { id, name, latitude, longitude };
   }
 );
 
+// other way to send the data
 export const fetchTheWeatherInfo = createAsyncThunk(
   "weatherInfo/fetch",
   async ({ latitude, longitude }: { latitude: number; longitude: number }) => {
@@ -96,6 +101,8 @@ const geoSlice = createSlice({
   initialState,
   reducers: {},
 
+
+  // reducer for API function
   extraReducers(builder) {
     // do the type of status do someting
     builder
@@ -106,7 +113,7 @@ const geoSlice = createSlice({
       .addCase(featchGeoInfo.fulfilled, (state, action) => {
         state.isLoding = false;
         state.status = "succeeded";
-        state.info = action.payload;
+        state.info = action.payload; // acessc the data from API fetch
       })
       .addCase(featchGeoInfo.rejected, (state, action) => {
         state.status = " failed";
