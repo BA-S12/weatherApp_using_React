@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+
 import axios from "axios";
 interface stateType {
   value: number;
@@ -88,10 +88,6 @@ export const fetchTheWeatherInfo = createAsyncThunk(
     const state = data.current.is_day;
 
     return { time, temperature, weatherCode, state };
-    // setTime(res.data.daily.time[0]);
-    // setTemperature(res.data.hourly.temperature_180m[0]);
-    // setWeatherCode(res.data.hourly.weather_code[0]);
-    // setState(res.data.current.is_day);
   }
 );
 
@@ -110,7 +106,6 @@ const geoSlice = createSlice({
       .addCase(featchGeoInfo.fulfilled, (state, action) => {
         state.isLoding = false;
         state.status = "succeeded";
-        console.log("the data from redux geo inf", action.payload);
         state.info = action.payload;
       })
       .addCase(featchGeoInfo.rejected, (state, action) => {
@@ -125,7 +120,6 @@ const geoSlice = createSlice({
       .addCase(fetchTheWeatherInfo.fulfilled, (state, action) => {
         state.isLoadingWeather = false;
 
-        console.log("the data from redux weather info", action.payload);
         state.weatherInfo = action.payload;
       })
       .addCase(fetchTheWeatherInfo.rejected, (state, action) => {
@@ -134,6 +128,6 @@ const geoSlice = createSlice({
   },
 });
 
-export const {} = geoSlice.actions;
+// export const {} = geoSlice.actions;
 
 export default geoSlice.reducer;

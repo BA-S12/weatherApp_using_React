@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 
+import WeatherSkeletonCard from "./WeatherSkeletonCard"; 
+
 import { useTranslation } from "react-i18next";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../app/store";
@@ -20,12 +22,20 @@ interface weatherInfo {
   state: number;
 }
 function WeatherCard() {
+  // for get the  latitude, longitude form other API
   const info: Location = useSelector((state: RootState) => state.geo.info);
+
   const dispatch = useDispatch<AppDispatch>();
+
   const weatherInfo: weatherInfo = useSelector(
     (state: RootState) => state.geo.weatherInfo
   );
+  // check the status of Geo API
   const status = useSelector((state: RootState) => state.geo.status);
+
+  const isLoadingWeather = useSelector(
+    (state: RootState) => state.geo.isLoadingWeather
+  );
 
   const weatherIcons: { [key: number]: string } = {
     0: "/icons/wi-day-sunny.svg",
@@ -84,7 +94,7 @@ function WeatherCard() {
         })
       );
     }
-  }, [status]); // status to fetch after another fetch
+  }, [status, info.latitude, info.longitude, dispatch]); // status to fetch after another fetch
 
   const handleLanguageChnage = () => {
     if (language === "AR") {
@@ -104,35 +114,43 @@ function WeatherCard() {
 
   return (
     <>
-      <div className="text-white flex flex-col items-center justify-center m-10 py-4 px-6 bg-[#003049] rounded-2xl shadow-2xl shadow-black/30 ">
-        <div className="head  flex gap-10  items-center self-start mb-4">
-          <div className="cityName">
-            <h1 className="text-[40px] font-bold">
-              {info.name}
-              <span className="text-[20px] font-thin">
-                {timeArr[0]} {monthName} {timeArr[2]}
-              </span>
-            </h1>
+      {isLoadingWeather ? (
+         <WeatherSkeletonCard />
+      ) : (
+        <div className="text-white flex flex-col items-center justify-center m-10 py-4 px-6 bg-[#003049] rounded-2xl shadow-2xl shadow-black/30 ">
+          <div className="head  flex gap-10  items-center self-start mb-4">
+            <div className="cityName">
+              <h1 className="text-[40px] font-bold">
+                {info.name}
+                <span className="text-[20px] font-thin">
+                  {timeArr[0]} {monthName} {timeArr[2]}
+                </span>
+              </h1>
+            </div>
           </div>
-        </div>
 
-        <div className="body flex items-center justify-center gap-6">
-          <div className="data font-medium text-left leading-[2] text-[17px] capitalize">
-            <h1 className="text-7xl font-semibold">{weatherInfo.temperature}</h1>
-            <p>{weatherCodeMap[weatherInfo.state || 0]}</p>
-            <p className="">
-              {t("down")}:{weatherInfo.temperature} | {t("up")}:{weatherInfo.temperature}
-            </p>
-          </div>
-          <div className="image">
-            <img
-              src={weatherIcons[weatherInfo.weatherCode || 0]}
-              alt={weatherInfo.state ? "" : ""}
-              className="w-[200px]"
-            />
+          <div className="body flex items-center justify-center gap-6">
+            <div className="data font-medium text-left leading-[2] text-[17px] capitalize">
+              <h1 className="text-7xl font-semibold">
+                {weatherInfo.temperature}
+              </h1>
+              <p>{weatherCodeMap[weatherInfo.state || 0]}</p>
+              <p className="">
+                {t("down")}:{weatherInfo.temperature} | {t("up")}:
+                {weatherInfo.temperature}
+              </p>
+            </div>
+            <div className="image">
+              <img
+                src={weatherIcons[weatherInfo.weatherCode || 0]}
+                alt={weatherInfo.state ? "" : ""}
+                className="w-[200px]"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
       <p onClick={handleLanguageChnage} className="text-white cursor-pointer">
         {language === "AR" ? "EN" : "عربي"}
       </p>
